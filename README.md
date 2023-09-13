@@ -7,7 +7,7 @@ Create following table and corresponding entity(DOMAIN OBJECT), DTO(DTO and its 
 ####                                       ####
 #### AUTHOR: VIKAS KUMAR                   ####
 #### LICENCE: GRADLIC SOLUTIONS PVT LTD    ####
-#### DATE: 06/SEPT/2023                    ####
+#### DATE: 14/SEPT/2023                    ####
 #### VERSION: 1.0.0                        ####
 ####                                       ####
 ###############################################
@@ -47,7 +47,7 @@ CREATE TABLE users(
     street VARCHAR(255),
     locality VARCHAR(255),
     city VARCHAR(255),
-    state VARCHAR(255)
+    state VARCHAR(255),
     country VARCHAR(255),
     pincode int,
     latitude double,
@@ -62,7 +62,7 @@ CREATE TABLE users(
     profile_image_url VARCHAR(255) DEFAULT 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
     user_nfc_card_number VARCHAR(255),
     last_login_date DATETIME,
-    last_login_date_display DATETIME
+    last_login_date_display DATETIME,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT UQ_USERS_EMAIL UNIQUE(email)
 );
@@ -127,7 +127,7 @@ CREATE TABLE reset_password_verifications(
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     url VARCHAR(255) NOT NULL,
-    expiration_date DATETIME NOT NULL
+    expiration_date DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT UQ_RESET_PASSWORD_VERIFICATION_USER_ID UNIQUE(user_id),
     CONSTRAINT UQ_RESET_PASSWORD_VERIFICATION_URL UNIQUE(url)
@@ -139,7 +139,7 @@ CREATE TABLE two_factor_verifications(
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     code VARCHAR(10) NOT NULL,
-    expiration_date DATETIME NOT NULL
+    expiration_date DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT UQ_TWO_FACTOR_VERIFICATION_USER_ID UNIQUE(user_id),
     CONSTRAINT UQ_TWO_FACTOR_PASSWORD_VERIFICATION_CODE UNIQUE(code)
