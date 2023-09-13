@@ -1,0 +1,24 @@
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  datasource:
+    url: jdbc:mysql://localhost:3306/all_in_one
+    password: password
+    username: user
+  jpa:
+    properties:
+      database: mysql
+      database-platform: org.hibernate.dialect.MySQL8Dialect
+      hibernate:
+        globally_quoted_identifiers: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  sql:
+    init:
+      mode: never
+      # mode: always
+      continue-on-error: false
