@@ -3,8 +3,8 @@ spring:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   datasource:
     url: jdbc:mysql://localhost:3306/all_in_one
-    password: password
-    username: user
+    password: Fuck@Bitch143
+    username: vikas
   jpa:
     properties:
       database: mysql
