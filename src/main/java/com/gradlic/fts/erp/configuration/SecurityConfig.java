@@ -1,5 +1,6 @@
 package com.gradlic.fts.erp.configuration;
 
+import com.gradlic.fts.erp.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private static final String[] PUBLIC_URL = {};
     private final BCryptPasswordEncoder encoder;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -38,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth-> auth.requestMatchers(PUBLIC_URL).permitAll())
                 .authorizeHttpRequests(auth-> auth.requestMatchers(HttpMethod.DELETE, "/user/delete/**").hasAnyAuthority("DELETE:USER"))
                 .authorizeHttpRequests(auth-> auth.requestMatchers(HttpMethod.DELETE, "/customer/delete/**").hasAnyAuthority("DELETE:CUSTOMER"))
-                .exceptionHandling(e -> e.accessDeniedHandler(null).authenticationEntryPoint(null))
+                .exceptionHandling(e -> e.accessDeniedHandler(customAccessDeniedHandler).authenticationEntryPoint(null))
                 .authorizeHttpRequests(auth-> auth.anyRequest().authenticated())
                 .build();
 
