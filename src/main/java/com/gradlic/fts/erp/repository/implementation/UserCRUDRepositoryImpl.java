@@ -3,7 +3,7 @@ package com.gradlic.fts.erp.repository.implementation;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.exception.ApiException;
-import com.gradlic.fts.erp.repository.PersonCRUDRepository;
+import com.gradlic.fts.erp.repository.UserCRUDRepository;
 import com.gradlic.fts.erp.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import static com.gradlic.fts.erp.query.UserQuery.*;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class PersonCRUDRepositoryImpl implements PersonCRUDRepository<User> {
+public class UserCRUDRepositoryImpl implements UserCRUDRepository<User> {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
