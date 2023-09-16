@@ -18,7 +18,7 @@ public class Organisation {
 
     @ManyToMany(mappedBy = "organisations")
     @JsonIgnoreProperties("organisations")
-    private Set<Person> persons;
+    private Set<User> users;
 
     public Long getId() {
         return id;
@@ -52,11 +52,11 @@ public class Organisation {
         this.address = address;
     }
 
-    public Set<Person> getPersons() {
-        return persons;
+    public Set<User> getPersons() {
+        return users;
     }
 
-    public void setPersons(Set<Person> persons) {
-        this.persons = persons;
+    public void setPersons(Set<User> users) {
+        this.users = users;
     }
 }

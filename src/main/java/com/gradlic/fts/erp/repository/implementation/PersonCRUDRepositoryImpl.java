@@ -1,6 +1,6 @@
 package com.gradlic.fts.erp.repository.implementation;
 
-import com.gradlic.fts.erp.domain.Person;
+import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.repository.PersonCRUDRepository;
@@ -28,14 +28,14 @@ import static com.gradlic.fts.erp.query.UserQuery.*;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class PersonCRUDRepositoryImpl implements PersonCRUDRepository<Person> {
+public class PersonCRUDRepositoryImpl implements PersonCRUDRepository<User> {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RoleRepository<Role> roleRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Override
-    public Person create(Person user) {
+    public User create(User user) {
         if(getEmailCount(user.getEmail().trim().toLowerCase()) > 0 ) throw new ApiException("Email already in use. Please use a different email and try again.");
         try{
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -59,17 +59,17 @@ public class PersonCRUDRepositoryImpl implements PersonCRUDRepository<Person> {
 
 
     @Override
-    public Collection<Person> list(int page, int pageSize) {
+    public Collection<User> list(int page, int pageSize) {
         return null;
     }
 
     @Override
-    public Person get(Long id) {
+    public User get(Long id) {
         return null;
     }
 
     @Override
-    public Person update(Person data) {
+    public User update(User data) {
         return null;
     }
 
@@ -83,7 +83,7 @@ public class PersonCRUDRepositoryImpl implements PersonCRUDRepository<Person> {
         return jdbcTemplate.queryForObject(COUNT_USER_EMAIL_QUERY, Map.of("email", email), Integer.class);
     }
 
-    private SqlParameterSource getSqlParameterSource(Person user) {
+    private SqlParameterSource getSqlParameterSource(User user) {
         return new MapSqlParameterSource()
                 .addValue("firstName", user.getFirstName())
                 .addValue("lastName", user.getLastName())

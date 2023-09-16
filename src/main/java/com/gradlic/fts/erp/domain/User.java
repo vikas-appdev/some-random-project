@@ -20,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Person {
+public class User {
     @Id
     @Column(updatable = false, nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

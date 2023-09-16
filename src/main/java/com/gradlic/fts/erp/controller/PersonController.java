@@ -1,6 +1,6 @@
 package com.gradlic.fts.erp.controller;
 
-import com.gradlic.fts.erp.domain.Person;
+import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.repository.OrganisationRepository;
 import com.gradlic.fts.erp.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +19,22 @@ public class PersonController {
     private OrganisationRepository organisationRepository;
 
     @PostMapping
-    public Person savePerson(@RequestBody Person person){
-        return personRepository.save(person);
+    public User savePerson(@RequestBody User user){
+        return personRepository.save(user);
     }
 
     @GetMapping
-    public List<Person> getAllPersons(){
+    public List<User> getAllPersons(){
         return personRepository.findAll();
     }
 
     @GetMapping("/{userId}")
-    public Person getPersonById(@PathVariable Long userId){
+    public User getPersonById(@PathVariable Long userId){
         return personRepository.findById(userId).orElse(null);
     }
 
     @GetMapping("/find/{name}")
-    public List<Person> findPersonsByFirstName(@PathVariable String name){
+    public List<User> findPersonsByFirstName(@PathVariable String name){
         return personRepository.findByFirstNameContaining(name);
     }
 

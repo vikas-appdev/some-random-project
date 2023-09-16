@@ -1,7 +1,7 @@
 package com.gradlic.fts.erp.resource;
 
 import com.gradlic.fts.erp.domain.HttpResponse;
-import com.gradlic.fts.erp.domain.Person;
+import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.service.UserService;
 import jakarta.validation.Valid;
@@ -37,8 +37,8 @@ public class UserResource {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<HttpResponse> saveUser(@RequestBody @Valid Person person){
-        UserDTO userDTO = userService.createUser(person);
+    public ResponseEntity<HttpResponse> saveUser(@RequestBody @Valid User user){
+        UserDTO userDTO = userService.createUser(user);
         return ResponseEntity.created(getUri()).body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .data(Map.of("user", userDTO))
