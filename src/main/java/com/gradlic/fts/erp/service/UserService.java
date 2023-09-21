@@ -6,4 +6,7 @@ import com.gradlic.fts.erp.dto.UserDTO;
 public interface UserService {
     UserDTO createUser(User user);
 
+    UserDTO getUserByUserEmail(String email);
+
+    void sendVerificationCode(UserDTO user);
 }

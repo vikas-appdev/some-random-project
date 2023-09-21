@@ -14,8 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.gradlic.fts.erp.enumeration.RoleType.ROLE_USER;
-import static com.gradlic.fts.erp.query.RoleQuery.INSERT_ROLE_TO_USER;
-import static com.gradlic.fts.erp.query.RoleQuery.SELECT_ROLE_BY_NAME_QUERY;
+import static com.gradlic.fts.erp.query.RoleQuery.*;
 import static java.util.Objects.*;
 
 @Repository
@@ -67,7 +66,17 @@ public class RoleRepositoryImpl implements RoleRepository<Role> {
 
     @Override
     public Role getRoleByUserId(Long userId) {
-        return null;
+
+        try{
+            log.info("fetch role to user id: {}", userId);
+            Role role = jdbc.queryForObject(SELECT_ROLE_BY_ID_QUERY, Map.of("id", userId), new RoleRowMapper());
+            System.out.println(role.getName());
+            return role;
+        }catch (EmptyResultDataAccessException exception){
+            throw new ApiException("No role found by name" + ROLE_USER.name());
+        }catch(Exception exception){
+            throw new ApiException("An error occurred. Please try again");
+        }
     }
 
     @Override
