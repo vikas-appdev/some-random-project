@@ -28,7 +28,9 @@ import java.util.*;
 import static com.gradlic.fts.erp.enumeration.RoleType.ROLE_USER;
 import static com.gradlic.fts.erp.enumeration.VerificationType.ACCOUNT;
 import static com.gradlic.fts.erp.query.UserQuery.*;
+import static com.gradlic.fts.erp.utils.SmsUtils.sendSMS;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
 
@@ -134,12 +136,12 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
     public void sendVerificationCode(UserDTO user) {
         String expirationDate = format(addDays(new Date(), 1), DATE_FORMAT);
 
-        String verificationCode = randomAlphabetic(8).toUpperCase();
+        String verificationCode = randomNumeric(6).toUpperCase();
 
         try{
             jdbcTemplate.update(DELETE_VERIFICATION_CODE_BY_USER_ID, Map.of("id", user.getId()));
             jdbcTemplate.update(INSERT_VERIFICATION_CODE_QUERY, Map.of("userId", user.getId(), "code", verificationCode, "expirationDate", expirationDate));
-            // sendSMS(user.getMobileNumber(), "FROM: ALL IN ONE APPLICATION \n Verification Code for login is\n "+verificationCode);
+            sendSMS(user.getMobileNumber(), "Your six digit verification code for login into Saraiya Factory App is: "+verificationCode+"\n\n- By GRADLIC SOLUTIONS PVT LTD.");
         }catch (Exception exception){
             log.error(exception.getMessage());
             throw new ApiException("An error occurred. Please try again.");

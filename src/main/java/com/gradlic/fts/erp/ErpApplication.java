@@ -1,5 +1,6 @@
 package com.gradlic.fts.erp;
 
+import com.gradlic.fts.erp.utils.SmsUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -13,6 +14,7 @@ public class ErpApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ErpApplication.class, args);
+		//SmsUtils.sendSMS("8723992495", "Hello Workd");
 	}
 
 	@Bean

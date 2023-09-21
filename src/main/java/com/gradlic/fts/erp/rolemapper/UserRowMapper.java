@@ -23,6 +23,7 @@ public class UserRowMapper implements RowMapper<User> {
                 .isActive(rs.getBoolean("is_active"))
                 .isNotLocked(rs.getBoolean("is_not_locked"))
                 .isUsingMFA(rs.getBoolean("using_mfa"))
+                .mobileNumber(rs.getString("mobile_number"))
                 //.lastLoginDate(rs.getTimestamp("last_login_date").toLocalDateTime())
                 //.lastLoginDateDisplay(rs.getTimestamp("last_login_date_display").toLocalDateTime())
 

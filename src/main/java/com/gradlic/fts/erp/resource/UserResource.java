@@ -68,6 +68,7 @@ public class UserResource {
     }
 
     private ResponseEntity<HttpResponse> sendVerificationCode(UserDTO user) {
+        System.out.println(user.getMobileNumber());
         userService.sendVerificationCode(user);
 
 
