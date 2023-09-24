@@ -7,7 +7,9 @@ import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.gradlic.fts.erp.domain.UserPrincipal;
+import com.gradlic.fts.erp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.stream;
 
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
 
     private static final String GRADLIC_SOLUTIONS = "Gradlic Solutions Private Limited";
@@ -34,6 +37,8 @@ public class TokenProvider {
     public static final String TOKEN_CAN_NOT_BE_VERIFIED = "Token can not be verified";
     @Value("${jwt.secret}")
     private String secret;
+
+    private final UserService userService;
 
     public String createAccessToken(UserPrincipal principal){
         String[] claims = getClaimsFromUser(principal);
@@ -71,7 +76,7 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String email, List<GrantedAuthority> authorities, HttpServletRequest request){
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userService.getUserByUserEmail(email), null, authorities);
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return authenticationToken;
     }

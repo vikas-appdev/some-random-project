@@ -4,11 +4,13 @@ import com.gradlic.fts.erp.domain.HttpResponse;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.LoginForm;
 import com.gradlic.fts.erp.provider.TokenProvider;
 import com.gradlic.fts.erp.service.RoleService;
 import com.gradlic.fts.erp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ import java.net.URI;
 import java.util.Map;
 
 import static com.gradlic.fts.erp.dtomapper.UserDTOMapper.toUser;
+import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
 import static java.time.LocalDateTime.now;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
@@ -39,16 +42,26 @@ public class UserResource {
 
     private final TokenProvider tokenProvider;
 
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
+
     @PostMapping("/login")
     public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginForm loginForm){
         //authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
 
-        authenticationManager.authenticate(unauthenticated(loginForm.getEmail(), loginForm.getPassword()));
+        //authenticationManager.authenticate(unauthenticated(loginForm.getEmail(), loginForm.getPassword()));
 
-        UserDTO user = userService.getUserByUserEmail(loginForm.getEmail());
+        // UserDTO user = userService.getUserByUserEmail(loginForm.getEmail());
 
+        Authentication authentication = authenticate(loginForm.getEmail(), loginForm.getPassword());
+        UserDTO user = getAuthenticatedUser(authentication);
         return user.isUsingMFA() ? sendVerificationCode(user) : sendResponse(user);
     }
+
+    private UserDTO getAuthenticatedUser(Authentication authentication){
+        return ((UserPrincipal) authentication.getPrincipal()).getUser();
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<HttpResponse> saveUser(@RequestBody @Valid User user){
@@ -113,7 +126,7 @@ public class UserResource {
     }
 
     private UserPrincipal getUserPrincipal(UserDTO user) {
-        return new UserPrincipal(toUser(userService.getUserByUserEmail(user.getEmail())), roleService.getRoleByUserId(user.getId()).getPermission());
+        return new UserPrincipal(toUser(userService.getUserByUserEmail(user.getEmail())), roleService.getRoleByUserId(user.getId()));
     }
 
     private ResponseEntity<HttpResponse> sendVerificationCode(UserDTO user) {
@@ -128,6 +141,17 @@ public class UserResource {
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
+    }
+
+    private Authentication authenticate(String email, String password){
+        try{
+            Authentication authentication = authenticationManager.authenticate(unauthenticated(email, password));
+            return authentication;
+        }catch (Exception exception){
+            processError(request, response, exception);
+            throw new ApiException(exception.getMessage());
+        }
+
     }
 
 }
