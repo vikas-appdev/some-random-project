@@ -10,4 +10,12 @@ public class UserQuery {
 
     public static final String DELETE_VERIFICATION_CODE_BY_USER_ID = "DELETE FROM two_factor_verifications WHERE user_id = :id";
     public static final String INSERT_VERIFICATION_CODE_QUERY = "INSERT INTO two_factor_verifications (user_id, code, expiration_date) VALUES (:userId, :code, :expirationDate)";
+
+    public static final String SELECT_USER_BY_USER_CODE_QUERY = "SELECT * FROM users WHERE id=(SELECT user_id FROM two_factor_verifications WHERE code = :code)";
+
+    public static final String DELETE_CODE_BY_CODE_QUERY = "DELETE FROM two_factor_verifications WHERE code= :code";
+
+    public static final String SELECT_CODE_EXPIRATION_QUERY = "SELECT expiration_date < now() AS is_expired FROM two_factor_verifications WHERE code = :code";
+
+
 }

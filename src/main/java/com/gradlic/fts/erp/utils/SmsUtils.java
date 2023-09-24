@@ -5,9 +5,9 @@ import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
 public class SmsUtils {
-    public static final String FROM_NUMBER = "";
-    public static final String SID_KEY = "";
-    public static final String TOKEN_KEY = "";
+    public static final String FROM_NUMBER = "+#";
+    public static final String SID_KEY = "#";
+    public static final String TOKEN_KEY = "#";
 
     public static void sendSMS(String to, String messageBody){
         System.out.println(to);

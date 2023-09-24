@@ -1,12 +1,12 @@
 package com.gradlic.fts.erp.repository.implementation;
 
-import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.Role;
+import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.exception.ApiException;
-import com.gradlic.fts.erp.repository.UserCRUDRepository;
 import com.gradlic.fts.erp.repository.RoleRepository;
+import com.gradlic.fts.erp.repository.UserCRUDRepository;
 import com.gradlic.fts.erp.rolemapper.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +28,6 @@ import java.util.*;
 import static com.gradlic.fts.erp.enumeration.RoleType.ROLE_USER;
 import static com.gradlic.fts.erp.enumeration.VerificationType.ACCOUNT;
 import static com.gradlic.fts.erp.query.UserQuery.*;
-import static com.gradlic.fts.erp.utils.SmsUtils.sendSMS;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
@@ -109,7 +107,6 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = getUserByEmail(email);
-        System.out.println(user.getFirstName());
         if (user == null){
             log.error("User not found in the database");
             throw new UsernameNotFoundException("User not found in the database");
@@ -141,10 +138,42 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
         try{
             jdbcTemplate.update(DELETE_VERIFICATION_CODE_BY_USER_ID, Map.of("id", user.getId()));
             jdbcTemplate.update(INSERT_VERIFICATION_CODE_QUERY, Map.of("userId", user.getId(), "code", verificationCode, "expirationDate", expirationDate));
-            sendSMS(user.getMobileNumber(), "Your six digit verification code for login into Saraiya Factory App is: "+verificationCode+"\n\n- By GRADLIC SOLUTIONS PVT LTD.");
+            // sendSMS(user.getMobileNumber(), "Your six digit verification code for login into Saraiya Factory App is: "+verificationCode+"\n\n- By GRADLIC SOLUTIONS PVT LTD.");
+            log.info("Verification Code is: {}", verificationCode);
         }catch (Exception exception){
             log.error(exception.getMessage());
             throw new ApiException("An error occurred. Please try again.");
+        }
+    }
+
+    @Override
+    public User verifyCode(String email, String code) {
+        if (isVerificationCodeExpired(code)) throw new ApiException("This code has expired. Please login again.");
+        try{
+            User userByCode = jdbcTemplate.queryForObject(SELECT_USER_BY_USER_CODE_QUERY, Map.of("code", code), new UserRowMapper());
+            User userByEmail = jdbcTemplate.queryForObject(SELECT_USER_BY_EMAIL_QUERY, Map.of("email", email), new UserRowMapper());
+            if (userByCode.getEmail().equalsIgnoreCase(userByEmail.getEmail())){
+                jdbcTemplate.update(DELETE_CODE_BY_CODE_QUERY, Map.of("code", code));
+                return userByCode;
+            }else {
+                throw new ApiException("Code is invalid. Please try again.");
+            }
+        }catch(EmptyResultDataAccessException exception){
+            throw new ApiException("Unable to find record");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    private Boolean isVerificationCodeExpired(String code) {
+        try{
+            return jdbcTemplate.queryForObject(SELECT_CODE_EXPIRATION_QUERY, Map.of("code", code), Boolean.class);
+        }catch(EmptyResultDataAccessException exception){
+            throw new ApiException("This code is not valid. Please login again.");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
         }
     }
 }
