@@ -4,6 +4,7 @@ import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.enumeration.VerificationType;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.repository.RoleRepository;
 import com.gradlic.fts.erp.repository.UserCRUDRepository;
@@ -27,6 +28,7 @@ import java.util.*;
 
 import static com.gradlic.fts.erp.enumeration.RoleType.ROLE_USER;
 import static com.gradlic.fts.erp.enumeration.VerificationType.ACCOUNT;
+import static com.gradlic.fts.erp.enumeration.VerificationType.PASSWORD;
 import static com.gradlic.fts.erp.query.UserQuery.*;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
@@ -44,7 +46,6 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
 
     @Override
     public User create(User user) {
-        System.out.println(getEmailCount(user.getEmail().trim().toLowerCase()));
         if(getEmailCount(user.getEmail().trim().toLowerCase()) > 0 ) throw new ApiException("Email already in use. Please use a different email and try again.");
         try{
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -101,7 +102,7 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
     }
 
     private String getVerificationUrl(String key, String type){
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify"+type+"/"+key).toUriString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/verify/"+type+"/"+key).toUriString();
     }
 
     @Override
@@ -160,6 +161,78 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
             }
         }catch(EmptyResultDataAccessException exception){
             throw new ApiException("Unable to find record");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    @Override
+    public void resetPassword(String email) {
+        if(getEmailCount(email.trim().toLowerCase()) <=0) throw new ApiException("No account found for the given email address");
+        try{
+            String expirationDate = format(addDays(new Date(), 1), DATE_FORMAT);
+            User user = getUserByEmail(email);
+            String verificationUrl = getVerificationUrl(UUID.randomUUID().toString(), PASSWORD.getType());
+            jdbcTemplate.update(DELETE_PASSWORD_VERIFICATION_BY_USER_ID_QUERY, Map.of("userId", user.getId()));
+            jdbcTemplate.update(INSERT_PASSWORD_VERIFICATION_QUERY, Map.of("userId", user.getId(), "url", verificationUrl, "expirationDate", expirationDate));
+            // Send email with url to the user
+            log.info("Verification Url: {}", verificationUrl);
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    @Override
+    public User verifyPasswordKey(String key) {
+        if (isLinkExpired(key, PASSWORD)) throw new ApiException("This link has expired. Please reset your password again.");
+        try{
+            User user = jdbcTemplate.queryForObject(SELECT_USER_BY_PASSWORD_URL_QUERY, Map.of("url", getVerificationUrl(key, PASSWORD.getType())), new UserRowMapper());
+            // DELETE USER FROM PASSWORD VERIFICATION TABLE
+            return user;
+        }catch(EmptyResultDataAccessException exception){
+            log.error(exception.getMessage());
+            throw new ApiException("This link is not valid, Please reset your password again.");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    @Override
+    public void renewPassword(String key, String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) throw new ApiException("Password don't match, Please try again");
+        try{
+            jdbcTemplate.update(UPDATE_USER_PASSWORD_BY_URL_QUERY, Map.of("password", encoder.encode(password), "url", getVerificationUrl(key, PASSWORD.getType())));
+            jdbcTemplate.update(DELETE_VERIFICATION_BY_URL_QUERY, Map.of("url", getVerificationUrl(key, PASSWORD.getType())));
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    @Override
+    public User verifyAccountKey(String key) {
+        try{
+            User user =  jdbcTemplate.queryForObject(SELECT_USER_BY_ACCOUNT_URL_QUERY, Map.of("url", getVerificationUrl(key, ACCOUNT.getType())), new UserRowMapper());
+            jdbcTemplate.update(UPDATE_USER_ENABLED_QUERY, Map.of("isActive", true, "id", user.getId()));
+            // DELETE AFTER UPDATING
+            return user;
+        }catch(EmptyResultDataAccessException exception){
+            throw new ApiException("This link is not valid.");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    private Boolean isLinkExpired(String key, VerificationType password) {
+        try{
+            return jdbcTemplate.queryForObject(SELECT_EXPIRATION_BY_URL_QUERY, Map.of("url", getVerificationUrl(key, PASSWORD.getType())), Boolean.class);
+        }catch(EmptyResultDataAccessException exception){
+            log.error(exception.getMessage());
+            throw new ApiException("This link is not valid, Please reset your password again.");
         }catch(Exception exception){
             log.error(exception.getMessage());
             throw new ApiException("An error occurred, Please try again.");

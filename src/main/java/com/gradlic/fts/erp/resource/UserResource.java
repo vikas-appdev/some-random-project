@@ -27,6 +27,7 @@ import java.util.Map;
 import static com.gradlic.fts.erp.dtomapper.UserDTOMapper.toUser;
 import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
 import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
 @RestController
@@ -78,12 +79,20 @@ public class UserResource {
 
     @RequestMapping("/error")
     public ResponseEntity<HttpResponse> handleError(HttpServletRequest request){
-        return ResponseEntity.badRequest().body(
+        /*return ResponseEntity.badRequest().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .reason("404, Resource not found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .status(NOT_FOUND)
+                        .statusCode(NOT_FOUND.value())
                         .build()
+        );*/
+
+        return new ResponseEntity<>(HttpResponse.builder()
+                .timeStamp(now().toString())
+                .reason("There is no mapping for a "+request.getMethod()+" request for this path on this server")
+                .status(NOT_FOUND)
+                .statusCode(NOT_FOUND.value())
+                .build(), NOT_FOUND
         );
     }
 
@@ -99,6 +108,40 @@ public class UserResource {
                         .build());
     }
 
+    @GetMapping("/resetpassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable String email){
+        userService.resetPassword(email);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .message("Email sent. Please check your email to reset your password")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @GetMapping("/verify/password/{key}")
+    public ResponseEntity<HttpResponse> verifyPasswordUrl(@PathVariable String key){
+        UserDTO userDTO = userService.verifyPasswordKey(key);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .data(Map.of("user", userDTO))
+                        .message("Please enter a new password")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @PostMapping("/resetpassword/{key}/{password}/{confirmPassword}")
+    public ResponseEntity<HttpResponse> resetPasswordWithKey(@PathVariable String key, @PathVariable String password, @PathVariable String confirmPassword){
+        userService.renewPassword(key, password, confirmPassword);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .message("Password reset successfully")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
     @GetMapping("/verify/code/{email}/{code}")
     public ResponseEntity<HttpResponse> verifyCode(@PathVariable("email") String email, @PathVariable("code") String code){
         UserDTO user = userService.verifyCode(email, code);
@@ -106,6 +149,16 @@ public class UserResource {
                 HttpResponse.builder().timeStamp(now().toString())
                         .data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)), "refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))))
                         .message("Login successful")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @GetMapping("/verify/account/{key}")
+    public ResponseEntity<HttpResponse> verifyAccount(@PathVariable("key") String key){
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .message(userService.verifyAccountKey(key).isActive() ? "Account already verified": "Account verified")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
