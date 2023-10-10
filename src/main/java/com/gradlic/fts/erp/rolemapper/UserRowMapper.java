@@ -1,5 +1,6 @@
 package com.gradlic.fts.erp.rolemapper;
 
+import com.gradlic.fts.erp.domain.Address;
 import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.domain.User;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,6 +25,9 @@ public class UserRowMapper implements RowMapper<User> {
                 .isNotLocked(rs.getBoolean("is_not_locked"))
                 .isUsingMFA(rs.getBoolean("using_mfa"))
                 .mobileNumber(rs.getString("mobile_number"))
+                .profileImageUrl(rs.getString("profile_image_url"))
+                .createdAt(rs.getTimestamp("created_date").toLocalDateTime())
+                .address(Address.builder().doorNumber(rs.getString("door_number")).street(rs.getString("street")).locality(rs.getString("locality")).city(rs.getString("city")).state(rs.getString("state")).country(rs.getString("country")).pincode(rs.getInt("pincode")).latitude(rs.getDouble("latitude")).longitude(rs.getDouble("longitude")).build())
                 //.lastLoginDate(rs.getTimestamp("last_login_date").toLocalDateTime())
                 //.lastLoginDateDisplay(rs.getTimestamp("last_login_date_display").toLocalDateTime())
 

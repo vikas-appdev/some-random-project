@@ -26,7 +26,10 @@ import java.util.Map;
 
 import static com.gradlic.fts.erp.dtomapper.UserDTOMapper.toUser;
 import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
+import static com.gradlic.fts.erp.utils.UserUtils.getAuthenticatedUser;
+import static com.gradlic.fts.erp.utils.UserUtils.getLoggedInUser;
 import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
@@ -46,6 +49,8 @@ public class UserResource {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
 
+    private static final String TOKEN_PREFIX = "Bearer ";
+
     @PostMapping("/login")
     public ResponseEntity<HttpResponse> login(@RequestBody @Valid LoginForm loginForm){
         //authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
@@ -55,13 +60,11 @@ public class UserResource {
         // UserDTO user = userService.getUserByUserEmail(loginForm.getEmail());
 
         Authentication authentication = authenticate(loginForm.getEmail(), loginForm.getPassword());
-        UserDTO user = getAuthenticatedUser(authentication);
+        UserDTO user = getLoggedInUser(authentication);
         return user.isUsingMFA() ? sendVerificationCode(user) : sendResponse(user);
     }
 
-    private UserDTO getAuthenticatedUser(Authentication authentication){
-        return ((UserPrincipal) authentication.getPrincipal()).getUser();
-    }
+
 
 
     @PostMapping("/register")
@@ -98,7 +101,7 @@ public class UserResource {
 
     @GetMapping("/profile")
     public ResponseEntity<HttpResponse> profile(Authentication authentication){
-        UserDTO user = userService.getUserByUserEmail(authentication.getName());
+        UserDTO user = userService.getUserByUserEmail(getAuthenticatedUser(authentication).getEmail());
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .data(Map.of("user", user))
@@ -164,6 +167,36 @@ public class UserResource {
                         .build());
     }
 
+    @GetMapping("/refresh/token")
+    public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request){
+        if(isHeaderAndTokenValid(request)){
+            String token = request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length());
+            UserDTO user = userService.getUserByUserEmail(tokenProvider.getSubject(token, request));
+            return ResponseEntity.ok().body(
+                    HttpResponse.builder().timeStamp(now().toString())
+                            .data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)),
+                                    "refresh_token", token))
+                            .message("Token refreshed")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
+        }else {
+            return ResponseEntity.badRequest().body(
+                    HttpResponse.builder().timeStamp(now().toString())
+                            .reason("Refresh token missing or invalid")
+                            .developerMessage("Refresh token missing or invalid")
+                            .status(HttpStatus.BAD_REQUEST)
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .build());
+        }
+    }
+
+    private boolean isHeaderAndTokenValid(HttpServletRequest request) {
+        return request.getHeader(AUTHORIZATION) !=null && request.getHeader(AUTHORIZATION).startsWith(TOKEN_PREFIX)
+                && tokenProvider.isTokenValid(tokenProvider.getSubject(request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length()), request),
+                request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length()));
+    }
+
     private URI getUri() {
         return URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/get/<userId>").toUriString());
     }
@@ -201,7 +234,7 @@ public class UserResource {
             Authentication authentication = authenticationManager.authenticate(unauthenticated(email, password));
             return authentication;
         }catch (Exception exception){
-            processError(request, response, exception);
+            // processError(request, response, exception);
             throw new ApiException(exception.getMessage());
         }
 

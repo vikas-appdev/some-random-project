@@ -39,7 +39,7 @@ public class User {
     private String profileImageUrl; // CDN flaticon avtar 512 149
     private LocalDateTime lastLoginDate;
     private LocalDateTime lastLoginDateDisplay;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
     private String role;
     private boolean isActive; // enabled
     private boolean isNotLocked;
