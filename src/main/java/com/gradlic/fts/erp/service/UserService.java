@@ -2,6 +2,7 @@ package com.gradlic.fts.erp.service;
 
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.form.UpdateForm;
 
 public interface UserService {
     UserDTO createUser(User user);
@@ -19,4 +20,8 @@ public interface UserService {
     void renewPassword(String key, String password, String confirmPassword);
 
     UserDTO verifyAccountKey(String key);
+
+    UserDTO updateUserDetails(UpdateForm user);
+
+    UserDTO getUserByUserId(Long userId);
 }

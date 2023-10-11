@@ -2,6 +2,7 @@ package com.gradlic.fts.erp.repository;
 
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.form.UpdateForm;
 
 import java.util.Collection;
 
@@ -25,4 +26,6 @@ public interface UserCRUDRepository<T extends User>{
     void renewPassword(String key, String password, String confirmPassword);
 
     User verifyAccountKey(String key);
+
+    User updateUserDetails(UpdateForm user);
 }

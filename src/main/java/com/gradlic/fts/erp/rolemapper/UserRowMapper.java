@@ -28,8 +28,8 @@ public class UserRowMapper implements RowMapper<User> {
                 .profileImageUrl(rs.getString("profile_image_url"))
                 .createdAt(rs.getTimestamp("created_date").toLocalDateTime())
                 .address(Address.builder().doorNumber(rs.getString("door_number")).street(rs.getString("street")).locality(rs.getString("locality")).city(rs.getString("city")).state(rs.getString("state")).country(rs.getString("country")).pincode(rs.getInt("pincode")).latitude(rs.getDouble("latitude")).longitude(rs.getDouble("longitude")).build())
-                //.lastLoginDate(rs.getTimestamp("last_login_date").toLocalDateTime())
-                //.lastLoginDateDisplay(rs.getTimestamp("last_login_date_display").toLocalDateTime())
+                .lastLoginDate(rs.getTimestamp("last_login_date").toLocalDateTime())
+                .lastLoginDateDisplay(rs.getTimestamp("last_login_date_display").toLocalDateTime())
 
                 .build();
     }

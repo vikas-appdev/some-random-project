@@ -6,6 +6,7 @@ import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.enumeration.VerificationType;
 import com.gradlic.fts.erp.exception.ApiException;
+import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.repository.RoleRepository;
 import com.gradlic.fts.erp.repository.UserCRUDRepository;
 import com.gradlic.fts.erp.rolemapper.UserRowMapper;
@@ -75,7 +76,15 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
 
     @Override
     public User get(Long id) {
-        return null;
+        try{
+            return jdbcTemplate.queryForObject(SELECT_USER_BY_ID, Map.of("id", id), new UserRowMapper());
+        }catch (EmptyResultDataAccessException exception){
+            log.error(exception.getMessage());
+            throw new ApiException("No user found by given id: "+id);
+        } catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred please try again");
+        }
     }
 
     @Override
@@ -99,6 +108,15 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
                 .addValue("lastName", user.getLastName())
                 .addValue("email", user.getEmail())
                 .addValue("password", encoder.encode(user.getPassword()));
+    }
+
+    private SqlParameterSource getUserDetailsSqlParameterSource(UpdateForm user) {
+        return new MapSqlParameterSource()
+                .addValue("id", user.getId())
+                .addValue("firstName", user.getFirstName())
+                .addValue("lastName", user.getLastName())
+                .addValue("email", user.getEmail())
+                .addValue("mobileNumber", user.getMobileNumber());
     }
 
     private String getVerificationUrl(String key, String type){
@@ -221,6 +239,17 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
             return user;
         }catch(EmptyResultDataAccessException exception){
             throw new ApiException("This link is not valid.");
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("An error occurred, Please try again.");
+        }
+    }
+
+    @Override
+    public User updateUserDetails(UpdateForm user) {
+        try{
+            jdbcTemplate.update(UPDATE_USER_DETAILS_QUERY, getUserDetailsSqlParameterSource(user));
+            return get(user.getId());
         }catch(Exception exception){
             log.error(exception.getMessage());
             throw new ApiException("An error occurred, Please try again.");

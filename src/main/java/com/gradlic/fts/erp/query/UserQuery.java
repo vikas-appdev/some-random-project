@@ -33,5 +33,10 @@ public class UserQuery {
 
     public static final String UPDATE_USER_ENABLED_QUERY = "UPDATE users SET is_active = :isActive WHERE id = :id";
 
+    public static final String UPDATE_USER_DETAILS_QUERY = "UPDATE users SET first_name = :firstName, last_name= :lastName, " +
+            "email= :email, mobile_number = :mobileNumber WHERE id=:id";
+
+    public static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=:id";
+
 
 }

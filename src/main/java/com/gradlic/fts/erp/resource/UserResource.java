@@ -6,6 +6,7 @@ import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.LoginForm;
+import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.provider.TokenProvider;
 import com.gradlic.fts.erp.service.RoleService;
 import com.gradlic.fts.erp.service.UserService;
@@ -111,6 +112,18 @@ public class UserResource {
                         .build());
     }
 
+    @PatchMapping("/update")
+    public ResponseEntity<HttpResponse> updateUser(@RequestBody @Valid UpdateForm user){
+        UserDTO updatedUser = userService.updateUserDetails(user);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .data(Map.of("user", updatedUser))
+                        .message("User Updated")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
     @GetMapping("/resetpassword/{email}")
     public ResponseEntity<HttpResponse> resetPassword(@PathVariable String email){
         userService.resetPassword(email);
@@ -171,7 +184,7 @@ public class UserResource {
     public ResponseEntity<HttpResponse> refreshToken(HttpServletRequest request){
         if(isHeaderAndTokenValid(request)){
             String token = request.getHeader(AUTHORIZATION).substring(TOKEN_PREFIX.length());
-            UserDTO user = userService.getUserByUserEmail(tokenProvider.getSubject(token, request));
+            UserDTO user = userService.getUserByUserId(tokenProvider.getSubject(token, request));
             return ResponseEntity.ok().body(
                     HttpResponse.builder().timeStamp(now().toString())
                             .data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)),

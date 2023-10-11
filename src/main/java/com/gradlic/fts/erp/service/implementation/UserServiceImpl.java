@@ -3,6 +3,7 @@ package com.gradlic.fts.erp.service.implementation;
 import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.repository.RoleRepository;
 import com.gradlic.fts.erp.repository.UserCRUDRepository;
 import com.gradlic.fts.erp.service.UserService;
@@ -58,6 +59,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO verifyAccountKey(String key) {
         return mapToUserDTO(userRepository.verifyAccountKey(key));
+    }
+
+    @Override
+    public UserDTO updateUserDetails(UpdateForm user) {
+        return mapToUserDTO(userRepository.updateUserDetails(user));
+    }
+
+    @Override
+    public UserDTO getUserByUserId(Long userId) {
+        return mapToUserDTO(userRepository.get(userId));
     }
 
     private UserDTO mapToUserDTO(User user){
