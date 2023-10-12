@@ -7,6 +7,7 @@ import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.LoginForm;
 import com.gradlic.fts.erp.form.UpdateForm;
+import com.gradlic.fts.erp.form.UpdatePasswordForm;
 import com.gradlic.fts.erp.provider.TokenProvider;
 import com.gradlic.fts.erp.service.RoleService;
 import com.gradlic.fts.erp.service.UserService;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.gradlic.fts.erp.dtomapper.UserDTOMapper.toUser;
 import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
@@ -113,7 +115,9 @@ public class UserResource {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<HttpResponse> updateUser(@RequestBody @Valid UpdateForm user){
+    public ResponseEntity<HttpResponse> updateUser(@RequestBody @Valid UpdateForm user) throws InterruptedException {
+        // Frontend loading test : Thread sleep 3 sec
+        TimeUnit.SECONDS.sleep(3);
         UserDTO updatedUser = userService.updateUserDetails(user);
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
@@ -130,6 +134,18 @@ public class UserResource {
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .message("Email sent. Please check your email to reset your password")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @PatchMapping("/update/password")
+    public ResponseEntity<HttpResponse> updatePassword(Authentication authentication, @RequestBody @Valid UpdatePasswordForm form){
+        UserDTO userDTO = getAuthenticatedUser(authentication);
+        userService.updatePassword(userDTO.getId(), form.getCurrentPassword(), form.getNewPassword(), form.getConfirmNewPassword());
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .message("Password updated successfully")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());

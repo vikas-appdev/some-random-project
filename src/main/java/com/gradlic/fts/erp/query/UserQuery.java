@@ -38,5 +38,7 @@ public class UserQuery {
 
     public static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=:id";
 
+    public static final String UPDATE_USER_PASSWORD_BY_ID_QUERY = "UPDATE users SET password = :password WHERE id= :userId";
+
 
 }
