@@ -33,8 +33,8 @@ public class TokenProvider {
     private static final String GRADLIC_SOLUTIONS = "Gradlic Solutions Private Limited";
     private static final String CUSTOMER_MANAGEMENT_SERVICE = "CUSTOMER_MANAGEMENT_SERVICE";
     public static final String AUTHORITIES = "authorities";
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3_600_000;
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3_600_000;//30_000; //3_600_000; // 1_800_000
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 432_000_000;//30_000;//432_000_000;
     public static final String TOKEN_CAN_NOT_BE_VERIFIED = "Token can not be verified";
     @Value("${jwt.secret}")
     private String secret;

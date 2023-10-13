@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 @Slf4j
@@ -144,9 +145,9 @@ public class HandleException extends ResponseEntityExceptionHandler implements E
                 HttpResponse.builder().timeStamp(now().toString())
                         .reason("Something went wrong")
                         .developerMessage(exception.getMessage())
-                        .status(BAD_REQUEST)
-                        .statusCode(BAD_REQUEST.value())
-                        .build(), BAD_REQUEST);
+                        .status(INTERNAL_SERVER_ERROR)
+                        .statusCode(INTERNAL_SERVER_ERROR.value())
+                        .build(), INTERNAL_SERVER_ERROR);
     }
 
 }
