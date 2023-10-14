@@ -32,6 +32,7 @@ import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
 import static com.gradlic.fts.erp.utils.UserUtils.getAuthenticatedUser;
 import static com.gradlic.fts.erp.utils.UserUtils.getLoggedInUser;
 import static java.time.LocalDateTime.now;
+import static java.util.Map.of;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
@@ -107,7 +108,7 @@ public class UserResource {
         UserDTO user = userService.getUserByUserEmail(getAuthenticatedUser(authentication).getEmail());
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(Map.of("user", user))
+                        .data(Map.of("user", user, "roles", roleService.getRoles()))
                         .message("Profile retrieved")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -146,6 +147,19 @@ public class UserResource {
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .message("Password updated successfully")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @PatchMapping("/update/role/{roleName}")
+    public ResponseEntity<HttpResponse> updateUserRole(Authentication authentication, @PathVariable String roleName){
+        UserDTO userDTO = getAuthenticatedUser(authentication);
+        userService.updateUserRole(userDTO.getId(), roleName);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "roles", roleService.getRoles()))
+                        .message("Role updated successfully")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
