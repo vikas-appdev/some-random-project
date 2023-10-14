@@ -6,6 +6,7 @@ import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.LoginForm;
+import com.gradlic.fts.erp.form.SettingsForm;
 import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.form.UpdatePasswordForm;
 import com.gradlic.fts.erp.provider.TokenProvider;
@@ -160,6 +161,19 @@ public class UserResource {
                 HttpResponse.builder().timeStamp(now().toString())
                         .data(of("user", userService.getUserByUserId(userDTO.getId()), "roles", roleService.getRoles()))
                         .message("Role updated successfully")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @PatchMapping("/update/settings")
+    public ResponseEntity<HttpResponse> updateAccountSettings(Authentication authentication, @RequestBody @Valid SettingsForm form){
+        UserDTO userDTO = getAuthenticatedUser(authentication);
+        userService.updateAccountSettings(userDTO.getId(), form.getActive(), form.getNotLocked());
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "roles", roleService.getRoles()))
+                        .message("Account settings updated successfully")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
