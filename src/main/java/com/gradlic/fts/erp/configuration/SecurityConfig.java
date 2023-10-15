@@ -32,7 +32,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_URL = {"/user/login/**", "/user/verify/code/**",
-            "/user/verify/password/**", "/user/verify/account/**", "/user/refresh/token/**", "/user/register/**", "/user/resetpassword/**"};
+            "/user/verify/password/**", "/user/verify/account/**", "/user/refresh/token/**", "/user/register/**", "/user/image/**", "/user/resetpassword/**"};
     private final BCryptPasswordEncoder encoder;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
