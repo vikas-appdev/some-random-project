@@ -179,6 +179,18 @@ public class UserResource {
                         .build());
     }
 
+    @PatchMapping("/togglemfa")
+    public ResponseEntity<HttpResponse> toggleMfa(Authentication authentication){
+        UserDTO userDTO = userService.toggleMfa(getAuthenticatedUser(authentication).getEmail());
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timeStamp(now().toString())
+                        .data(of("user", userDTO))
+                        .message("Multi factor authentication updated")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
     @GetMapping("/verify/password/{key}")
     public ResponseEntity<HttpResponse> verifyPasswordUrl(@PathVariable String key){
         UserDTO userDTO = userService.verifyPasswordKey(key);

@@ -32,6 +32,7 @@ import static com.gradlic.fts.erp.enumeration.VerificationType.ACCOUNT;
 import static com.gradlic.fts.erp.enumeration.VerificationType.PASSWORD;
 import static com.gradlic.fts.erp.query.UserQuery.*;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
 
@@ -280,6 +281,23 @@ public class UserCRUDRepositoryImpl implements UserCRUDRepository<User>, UserDet
             log.error(exception.getMessage());
             throw new ApiException("An error occurred, Please try again.");
         }
+    }
+
+    @Override
+    public User toggleMfa(String email) {
+        User user = getUserByEmail(email);
+        if (isBlank(user.getMobileNumber())) throw new ApiException("You need a phone number to enable MFA");
+
+        user.setUsingMFA(!user.isUsingMFA());
+
+        try{
+            jdbcTemplate.update(UPDATE_USER_MFA_QUERY, Map.of("email", email, "isUsingMfa", user.isUsingMFA()));
+            return user;
+        }catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ApiException("Unable to update MFA.");
+        }
+
     }
 
     private Boolean isLinkExpired(String key, VerificationType password) {
