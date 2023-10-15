@@ -3,6 +3,7 @@ package com.gradlic.fts.erp.repository;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.form.UpdateForm;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -34,4 +35,6 @@ public interface UserCRUDRepository<T extends User>{
     void updateAccountSettings(Long userId, Boolean enabled, Boolean notLocked);
 
     User toggleMfa(String email);
+
+    void updateImage(UserDTO user, MultipartFile image);
 }

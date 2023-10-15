@@ -3,6 +3,7 @@ package com.gradlic.fts.erp.service;
 import com.gradlic.fts.erp.domain.User;
 import com.gradlic.fts.erp.dto.UserDTO;
 import com.gradlic.fts.erp.form.UpdateForm;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     UserDTO createUser(User user);
@@ -32,4 +33,6 @@ public interface UserService {
     void updateAccountSettings(Long id, Boolean enabled, Boolean notLocked);
 
     UserDTO toggleMfa(String email);
+
+    void updateImage(UserDTO user, MultipartFile image);
 }
