@@ -1,4 +1,4 @@
-package com.gradlic.fts.erp.rolemapper;
+package com.gradlic.fts.erp.rowmapper;
 
 import com.gradlic.fts.erp.domain.Role;
 import org.springframework.jdbc.core.RowMapper;

@@ -2,8 +2,10 @@ package com.gradlic.fts.erp.resource;
 
 import com.gradlic.fts.erp.domain.HttpResponse;
 import com.gradlic.fts.erp.domain.User;
+import com.gradlic.fts.erp.domain.UserEvent;
 import com.gradlic.fts.erp.domain.UserPrincipal;
 import com.gradlic.fts.erp.dto.UserDTO;
+import com.gradlic.fts.erp.event.NewUserEvent;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.LoginForm;
 import com.gradlic.fts.erp.form.SettingsForm;
@@ -16,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +35,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.gradlic.fts.erp.dtomapper.UserDTOMapper.toUser;
+import static com.gradlic.fts.erp.enumeration.EventType.*;
+import static com.gradlic.fts.erp.utils.ExceptionsUtils.processError;
 import static com.gradlic.fts.erp.utils.UserUtils.getAuthenticatedUser;
 import static com.gradlic.fts.erp.utils.UserUtils.getLoggedInUser;
 import static java.time.LocalDateTime.now;
@@ -56,6 +61,7 @@ public class UserResource {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
+    private final ApplicationEventPublisher publisher;
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
@@ -67,8 +73,7 @@ public class UserResource {
 
         // UserDTO user = userService.getUserByUserEmail(loginForm.getEmail());
 
-        Authentication authentication = authenticate(loginForm.getEmail(), loginForm.getPassword());
-        UserDTO user = getLoggedInUser(authentication);
+        UserDTO user = authenticate(loginForm.getEmail(), loginForm.getPassword());
         return user.isUsingMFA() ? sendVerificationCode(user) : sendResponse(user);
     }
 
@@ -320,12 +325,20 @@ public class UserResource {
                         .build());
     }
 
-    private Authentication authenticate(String email, String password){
+    private UserDTO authenticate(String email, String password){
         try{
+            if (null != userService.getUserByUserEmail(email)){
+                publisher.publishEvent(new NewUserEvent(email, LOGIN_ATTEMPT));
+            }
             Authentication authentication = authenticationManager.authenticate(unauthenticated(email, password));
-            return authentication;
+            UserDTO userDTO = getLoggedInUser(authentication);
+            if (!userDTO.isUsingMFA()){
+                publisher.publishEvent(new NewUserEvent(email, LOGIN_ATTEMPT_SUCCESS));
+            }
+            return userDTO;
         }catch (Exception exception){
-            // processError(request, response, exception);
+            publisher.publishEvent(new NewUserEvent(email, LOGIN_ATTEMPT_FAILURE));
+            processError(request, response, exception);
             throw new ApiException(exception.getMessage());
         }
 

@@ -9,7 +9,7 @@ import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.repository.RoleRepository;
 import com.gradlic.fts.erp.repository.UserCRUDRepository;
-import com.gradlic.fts.erp.rolemapper.UserRowMapper;
+import com.gradlic.fts.erp.rowmapper.UserRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

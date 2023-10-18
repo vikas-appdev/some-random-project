@@ -1,13 +1,11 @@
-package com.gradlic.fts.erp.rolemapper;
+package com.gradlic.fts.erp.rowmapper;
 
 import com.gradlic.fts.erp.domain.Address;
-import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.domain.User;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class UserRowMapper implements RowMapper<User> {
     @Override

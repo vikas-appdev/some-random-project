@@ -9,14 +9,13 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Entity
+
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserEvent {
-
     private Long id;
     private String type;
     private String description;

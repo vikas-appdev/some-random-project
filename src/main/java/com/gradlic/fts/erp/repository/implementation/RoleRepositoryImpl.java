@@ -3,7 +3,7 @@ package com.gradlic.fts.erp.repository.implementation;
 import com.gradlic.fts.erp.domain.Role;
 import com.gradlic.fts.erp.exception.ApiException;
 import com.gradlic.fts.erp.repository.RoleRepository;
-import com.gradlic.fts.erp.rolemapper.RoleRowMapper;
+import com.gradlic.fts.erp.rowmapper.RoleRowMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;

@@ -145,3 +145,15 @@ INSERT INTO roles(name, permission) VALUES('ROLE_USER', 'READ:USER,READ:CUSTOMER
 ('ROLE_MANAGER', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER'),
 ('ROLE_ADMIN', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,CREATE:USER,CREATE:CUSTOMER'),
 ('ROLE_SYSADMIN', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,DELETE:USER,DELETE:CUSTOMER');
+
+INSERT INTO events (id, type, description) VALUES ('1', 'LOGIN_ATTEMPT', 'You tried to log in');
+INSERT INTO events (id, type, description) VALUES ('2', 'LOGIN_ATTEMPT_FAILURE', 'You tried to login and it failed');
+INSERT INTO events (id, type, description) VALUES ('3', 'LOGIN_ATTEMPT_SUCCESS', 'You tried to log in and it success');
+INSERT INTO events (id, type, description) VALUES ('4', 'PROFILE_UPDATE', 'You updated your profile information');
+INSERT INTO events (id, type, description) VALUES ('5', 'PROFILE_PICTURE_UPDATE', 'You updated your profile picture');
+INSERT INTO events (id, type, description) VALUES ('6', 'ROLE_UPDATE', 'You updated your role and permissions');
+INSERT INTO events (id, type, description) VALUES ('7', 'ACCOUNT_SETTINGS_UPDATE', 'You updated your account settings');
+INSERT INTO events (id, type, description) VALUES ('8', 'PASSWORD_UPDATE', 'You updated your password');
+INSERT INTO events (id, type, description) VALUES ('9', 'MFA_UPDATE', 'You updated your MFA settings');
+
+
