@@ -12,6 +12,7 @@ import com.gradlic.fts.erp.form.SettingsForm;
 import com.gradlic.fts.erp.form.UpdateForm;
 import com.gradlic.fts.erp.form.UpdatePasswordForm;
 import com.gradlic.fts.erp.provider.TokenProvider;
+import com.gradlic.fts.erp.service.EventService;
 import com.gradlic.fts.erp.service.RoleService;
 import com.gradlic.fts.erp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +55,7 @@ public class UserResource {
     private final UserService userService;
 
     private final RoleService roleService;
+    private final EventService eventService;
 
     private final AuthenticationManager authenticationManager;
 
@@ -117,7 +119,7 @@ public class UserResource {
         UserDTO user = userService.getUserByUserEmail(getAuthenticatedUser(authentication).getEmail());
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(Map.of("user", user, "roles", roleService.getRoles()))
+                        .data(Map.of("user", user, "events", eventService.getEventsByUserId(user.getId()), "roles", roleService.getRoles()))
                         .message("Profile retrieved")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -127,11 +129,12 @@ public class UserResource {
     @PatchMapping("/update")
     public ResponseEntity<HttpResponse> updateUser(@RequestBody @Valid UpdateForm user) throws InterruptedException {
         // Frontend loading test : Thread sleep 3 sec
-        TimeUnit.SECONDS.sleep(3);
+        // TimeUnit.SECONDS.sleep(3);
         UserDTO updatedUser = userService.updateUserDetails(user);
+        publisher.publishEvent(new NewUserEvent(updatedUser.getEmail(), PROFILE_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(Map.of("user", updatedUser))
+                        .data(Map.of("user", updatedUser, "events", eventService.getEventsByUserId(user.getId()), "roles", roleService.getRoles()))
                         .message("User Updated")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -153,9 +156,11 @@ public class UserResource {
     public ResponseEntity<HttpResponse> updatePassword(Authentication authentication, @RequestBody @Valid UpdatePasswordForm form){
         UserDTO userDTO = getAuthenticatedUser(authentication);
         userService.updatePassword(userDTO.getId(), form.getCurrentPassword(), form.getNewPassword(), form.getConfirmNewPassword());
+        publisher.publishEvent(new NewUserEvent(userDTO.getEmail(), PASSWORD_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .message("Password updated successfully")
+                        .data(of("user", userDTO, "events", eventService.getEventsByUserId(userDTO.getId()), "roles", roleService.getRoles()))
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
@@ -165,9 +170,10 @@ public class UserResource {
     public ResponseEntity<HttpResponse> updateUserRole(Authentication authentication, @PathVariable String roleName){
         UserDTO userDTO = getAuthenticatedUser(authentication);
         userService.updateUserRole(userDTO.getId(), roleName);
+        publisher.publishEvent(new NewUserEvent(userDTO.getEmail(), ROLE_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "roles", roleService.getRoles()))
+                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "events", eventService.getEventsByUserId(userDTO.getId()), "roles", roleService.getRoles()))
                         .message("Role updated successfully")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -178,9 +184,10 @@ public class UserResource {
     public ResponseEntity<HttpResponse> updateAccountSettings(Authentication authentication, @RequestBody @Valid SettingsForm form){
         UserDTO userDTO = getAuthenticatedUser(authentication);
         userService.updateAccountSettings(userDTO.getId(), form.getActive(), form.getNotLocked());
+        publisher.publishEvent(new NewUserEvent(userDTO.getEmail(), ACCOUNT_SETTINGS_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "roles", roleService.getRoles()))
+                        .data(of("user", userService.getUserByUserId(userDTO.getId()), "events", eventService.getEventsByUserId(userDTO.getId()), "roles", roleService.getRoles()))
                         .message("Account settings updated successfully")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -190,9 +197,10 @@ public class UserResource {
     @PatchMapping("/togglemfa")
     public ResponseEntity<HttpResponse> toggleMfa(Authentication authentication){
         UserDTO userDTO = userService.toggleMfa(getAuthenticatedUser(authentication).getEmail());
+        publisher.publishEvent(new NewUserEvent(userDTO.getEmail(), MFA_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(of("user", userDTO, "roles", roleService.getRoles()))
+                        .data(of("user", userDTO, "events", eventService.getEventsByUserId(userDTO.getId()), "roles", roleService.getRoles()))
                         .message("Multi factor authentication updated")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -203,9 +211,10 @@ public class UserResource {
     public ResponseEntity<HttpResponse> updateProfileImage(Authentication authentication, @RequestParam("image") MultipartFile image){
         UserDTO user = getAuthenticatedUser(authentication);
         userService.updateImage(user, image);
+        publisher.publishEvent(new NewUserEvent(user.getEmail(), PROFILE_PICTURE_UPDATE));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
-                        .data(of("user", userService.getUserByUserId(user.getId()), "roles", roleService.getRoles()))
+                        .data(of("user", userService.getUserByUserId(user.getId()), "events", eventService.getEventsByUserId(user.getId()), "roles", roleService.getRoles()))
                         .message("Profile image updated")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
@@ -244,6 +253,7 @@ public class UserResource {
     @GetMapping("/verify/code/{email}/{code}")
     public ResponseEntity<HttpResponse> verifyCode(@PathVariable("email") String email, @PathVariable("code") String code){
         UserDTO user = userService.verifyCode(email, code);
+        publisher.publishEvent(new NewUserEvent(user.getEmail(), LOGIN_ATTEMPT_SUCCESS));
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timeStamp(now().toString())
                         .data(Map.of("user", user, "access_token", tokenProvider.createAccessToken(getUserPrincipal(user)), "refresh_token", tokenProvider.createRefreshToken(getUserPrincipal(user))))
