@@ -1,11 +1,12 @@
 package com.gradlic.fts.erp.dto;
 
 import com.gradlic.fts.erp.domain.Address;
-import com.gradlic.fts.erp.domain.Organisation;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 // @Data
 @Setter
@@ -32,7 +33,7 @@ public class UserDTO {
     private String bio;
     private boolean isUsingMFA; // Multi factor authentication
     private Address address;
-    private Set<Organisation> organisations;
+    // private Set<Organisation> organisations;
 
     private String roleName;
     private String permissions;

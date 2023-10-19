@@ -14,17 +14,16 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Entity
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
-    @Id
-    @Column(updatable = false, nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+//    @Id
+//    @Column(updatable = false, nullable = false)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
     private String userId;
     @NotNull(message = "Firstname can not be null")
@@ -53,15 +52,15 @@ public class User {
     @Embedded
     private Address address;
 
-    @ManyToMany
-    @JoinTable(name = "PERSON_ORGANISATION", joinColumns = {
-            @JoinColumn(name = "person_id", referencedColumnName = "id")
-    },
-    inverseJoinColumns = {
-            @JoinColumn(name = "organisation_id", referencedColumnName = "id")
-    })
-    @JsonIgnoreProperties("persons")
-    private Set<Organisation> organisations;
+//    @ManyToMany
+//    @JoinTable(name = "PERSON_ORGANISATION", joinColumns = {
+//            @JoinColumn(name = "person_id", referencedColumnName = "id")
+//    },
+//    inverseJoinColumns = {
+//            @JoinColumn(name = "organisation_id", referencedColumnName = "id")
+//    })
+//    @JsonIgnoreProperties("persons")
+//    private Set<Organisation> organisations;
 
 
 }
