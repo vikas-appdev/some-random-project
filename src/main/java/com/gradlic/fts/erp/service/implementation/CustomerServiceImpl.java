@@ -2,8 +2,10 @@ package com.gradlic.fts.erp.service.implementation;
 
 import com.gradlic.fts.erp.domain.Customer;
 import com.gradlic.fts.erp.domain.Invoice;
+import com.gradlic.fts.erp.domain.Stats;
 import com.gradlic.fts.erp.repository.CustomerRepository;
 import com.gradlic.fts.erp.repository.InvoiceRepository;
+import com.gradlic.fts.erp.rowmapper.StatsRowMapper;
 import com.gradlic.fts.erp.service.CustomerService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+
+import static com.gradlic.fts.erp.query.CustomerQuery.STATS_QUERY;
 
 @Service
 @Transactional
@@ -24,6 +30,8 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     private final InvoiceRepository invoiceRepository;
+
+    private final NamedParameterJdbcTemplate jdbc;
 
 
     @Override
@@ -79,5 +87,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Invoice getInvoice(Long id) {
         return invoiceRepository.findById(id).get();
+    }
+
+    @Override
+    public Stats getStats() {
+        return jdbc.queryForObject(STATS_QUERY, Map.of(), new StatsRowMapper());
     }
 }

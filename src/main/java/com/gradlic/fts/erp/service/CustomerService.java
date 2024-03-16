@@ -2,6 +2,7 @@ package com.gradlic.fts.erp.service;
 
 import com.gradlic.fts.erp.domain.Customer;
 import com.gradlic.fts.erp.domain.Invoice;
+import com.gradlic.fts.erp.domain.Stats;
 import org.springframework.data.domain.Page;
 
 
@@ -18,4 +19,6 @@ public interface CustomerService {
     void addInvoiceToCustomer(Long id, Invoice invoice);
 
     Invoice getInvoice(Long id);
+
+    Stats getStats();
 }

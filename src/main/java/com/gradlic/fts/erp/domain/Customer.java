@@ -1,5 +1,6 @@
 package com.gradlic.fts.erp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,14 +22,24 @@ public class Customer {
     private Long id;
     private String name;
     private String email;
-    private String type;
-    private String status;
-    private String address;
     private String phone;
+    private String type; // BUSINESS INDIVIDUAL
+    private String status; // ACTIVE INACTIVE
+    private String address;
+
     private String imageUrl;
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Collection<Invoice> invoices;
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Collection<LoanAccount> loanAccounts;
+
+
+
+    @ManyToOne
+    @JsonIgnore
+    private Firm firm;
 
 }
